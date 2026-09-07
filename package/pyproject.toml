@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "skcredit"
+version = "0.1.0"
+description = "scikit-learn estimators for credit risk modelling"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+dependencies = ["scikit-learn>=1.6", "numpy>=1.26", "pandas>=2.1"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-cov"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/skcredit"]
+
+[tool.pytest.ini_options]
+addopts = "--doctest-modules"
+testpaths = ["tests", "src"]

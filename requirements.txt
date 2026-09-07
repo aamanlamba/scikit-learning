@@ -1,0 +1,32 @@
+# Core — everything in modules 00-05 needs only these
+scikit-learn>=1.7
+numpy>=1.26
+pandas>=2.1
+scipy>=1.11
+matplotlib>=3.8
+
+# Notebook environment
+jupyterlab>=4.0
+ipykernel>=6.29
+
+# Used from module 06 onwards
+xgboost>=2.0          # 06, 13  — gradient boosting comparison
+lightgbm>=4.0         # 06      — gradient boosting comparison
+imbalanced-learn>=0.12  # 03, 08 — SMOTE and the resampling pipeline
+optuna>=3.6           # 07      — Bayesian hyperparameter search
+shap>=0.45            # 12      — model explanations
+skops>=0.10           # 13      — safe model persistence
+
+# Module 15 — GPU / Array API. On Apple Silicon the default wheel includes MPS.
+# On Linux/Windows without CUDA, install the CPU wheel:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+torch>=2.2             # 15      — Array API dispatch target (optional)
+threadpoolctl>=3.2     # 15      — thread-pool inspection (ships with sklearn)
+
+# Module 11 — the packaging exercise writes an installable package to package/
+pytest>=8.0            # 11      — parametrize_with_checks + doctests
+
+# Optional, referenced but not required
+# catboost>=1.2       # 06      — third boosting library
+# sentence-transformers  # 10    — embeddings; large download, section is optional
+# fairlearn>=0.10     # 12      — fairness metrics beyond what we compute by hand
