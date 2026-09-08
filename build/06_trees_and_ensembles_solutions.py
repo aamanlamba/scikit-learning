@@ -499,8 +499,10 @@ for c in CAT:
     X_cat[c] = X_cat[c].astype("category")
 
 # Note `n_jobs=1` on the boosters below: the search itself is parallel, and
-# nesting thread pools causes heavy oversubscription — it made LightGBM ~40x
-# slower to tune here before it was fixed.
+# nesting thread pools causes heavy oversubscription. Leaving the booster at its
+# default made this search dramatically slower during development. That was an
+# observation, not a recorded measurement — Module 15 measures the penalty
+# properly, on whatever machine you run it on.
 BUDGET, tune_cv = 12, StratifiedKFold(3, shuffle=True, random_state=1)
 
 contenders = {

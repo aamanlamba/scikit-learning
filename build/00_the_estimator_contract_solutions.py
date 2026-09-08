@@ -171,7 +171,7 @@ print(f"mean difference: {leaky.mean() - clean.mean():+.5f}   (paired std {np.st
 # high-dimensional or target-aware — `SelectKBest`, `TargetEncoder`,
 # `QuantileTransformer` with few samples per quantile, PCA on wide data, or
 # anything fitted on 3,000 features and 300 rows (Module 03 measures that one:
-# 0.5 → 0.75 AUC on pure noise).
+# 0.5 → 0.82 AUC on pure noise).
 #
 # The lesson is not "scaling before splitting is fine". It is that **the size of
 # a leak depends on how much the transformer can learn**, so a small measured gap

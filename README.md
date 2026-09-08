@@ -15,6 +15,9 @@ scikit-learning/
 ├── solutions/       worked answers to every exercise
 ├── cheatsheets/     reference cards to keep open while you work
 ├── data/            generated BFSI datasets (regenerate with make_data.py)
+├── package/         skcredit — the installable package built in exercise 11.5
+├── service/         the FastAPI scoring service built in exercise 14.5
+├── artifacts/       model bundles and drift dashboards written by module 13
 ├── src/skmastery/   shared helpers and dataset generators
 ├── build/           jupytext sources the notebooks are generated from
 └── build.py         regenerate + execute all notebooks
@@ -24,10 +27,14 @@ Each module is a runnable notebook containing worked material, then a set of
 exercises at the end with empty cells. The matching file in `solutions/` has
 worked answers. Resist it until you have something that runs.
 
-> **Status.** All 16 module notebooks and all 7 cheat sheets are complete and
-> execute end to end against scikit-learn 1.8. Worked solutions are currently
-> written for modules **00–10**; the exercises for 11–15 are in the module
-> notebooks and are self-contained, but their answers are not yet written up.
+> **Status.** Complete. The orientation chapter, all 16 module notebooks, all 16
+> worked solution sets and all 7 cheat sheets execute end to end against
+> scikit-learn 1.8.
+>
+> The solutions are written as worked arguments, not answer keys. Several reach
+> the *opposite* conclusion to the one the exercise implies, because that is
+> what the data said — every numeric claim in them was checked against actual
+> notebook output and the prose rewritten where reality disagreed.
 >
 > **Module 15 is hardware-dependent by design.** It detects what accelerator you
 > have and adapts. It was built in a CPU-only container, so the GPU columns are
@@ -57,6 +64,12 @@ and then cache to `~/scikit_learn_data`.
 ---
 
 ## The curriculum
+
+### Before you start
+
+| # | Module | The idea it exists to install |
+|---|---|---|
+| — | [Start here](notebooks/000_start_here.ipynb) | numpy, pandas, scipy and where scikit-learn sits — including why any of it still matters in an LLM world. |
 
 ### Part I — Foundations
 

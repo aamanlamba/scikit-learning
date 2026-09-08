@@ -406,8 +406,24 @@ plt.tight_layout()
 front[["AP", "latency_ms", "cat_encoding", "max_leaf_nodes", "learning_rate"]].round(4)
 
 # %%
+# Measure the noise floor HERE, in the same metric, rather than citing a figure
+# from another module. Module 04's published noise floor is in ROC AUC; the
+# objective on this page is average precision, and the two do not share a scale.
+from sklearn.model_selection import RepeatedStratifiedKFold
+
+noise_pipe = Pipeline([("prep", make_prep()),
+                       ("clf", HistGradientBoostingClassifier(random_state=0,
+                                                              learning_rate=0.06))])
+floor = cross_val_score(
+    noise_pipe, X, y, scoring="average_precision",
+    cv=RepeatedStratifiedKFold(n_splits=5, n_repeats=6, random_state=0), n_jobs=-1)
+AP_SD = float(floor.std())
+print(f"AP noise floor for this estimator on this data, 30 resamples:")
+print(f"  mean {floor.mean():.4f}, sd {AP_SD:.4f}, "
+      f"range {floor.min():.4f}-{floor.max():.4f} (spread {np.ptp(floor):.4f})")
+
 best_ap = front.iloc[0]
-TOL = 0.01                                    # ~1/3 of the Module 04 noise floor
+TOL = round(AP_SD, 3)                         # one standard deviation of the noise
 eligible = front[front["AP"] >= front["AP"].max() - TOL]
 knee = eligible.sort_values("latency_ms").iloc[0]
 
@@ -432,20 +448,51 @@ print(f"\nAcross all trials: within {TOL} AP of the best, the cheapest costs "
       f"({100 * (1 - cheap['latency_ms'] / top['latency_ms']):.0f}% saved)")
 
 # %% [markdown]
-# **Justifying the point off the front.** The AP spread across these trials is
-# smaller than the fold-to-fold noise measured in Module 04 (±0.03), so on the
-# accuracy axis the candidates are statistically indistinguishable. The latency
-# axis is not noise — it is a measured, repeatable difference in cost per
-# prediction.
+# **Justifying the point off the front.** The tolerance above is not a round
+# number picked to make the argument work — it is **one standard deviation of
+# this estimator's average precision across 30 resamples of this data**, measured
+# in the cell above. Every candidate within it is statistically
+# indistinguishable from the best on the accuracy axis.
+#
+# Measuring it here rather than importing Module 04's figure matters: **Module
+# 04's published noise floor is in ROC AUC, and this page optimises average
+# precision.** The two metrics have different spreads on the same data, so
+# carrying a tolerance across from one to the other would be comparing
+# quantities that do not share a scale — a small error that survives review
+# easily, because both numbers are "the noise floor".
+#
+# The latency axis is not noise — it is a measured, repeatable difference in
+# cost per prediction.
 #
 # When one axis of a trade-off is inside the measurement noise and the other is
 # not, **the decision is made entirely on the axis you can measure**: take the
 # cheapest model whose accuracy is within noise of the best.
 #
-# Note how small the trade actually is here: the cheapest model within 0.01 AP of
-# the best saves ~7% of inference time. That is a real saving and a boring one —
-# at 13 ms for 10,000 rows, neither end of this front is going to breach any
-# plausible SLA, so the honest recommendation is "either; pick the simpler one".
+# **Two cautions about how much weight this deserves.**
+#
+# First, look at the size of the noise floor before celebrating the trade. One
+# standard deviation is 0.023 AP and the full spread across 30 resamples is
+# 0.10 — a *quarter* of the mean. On a 13% positive rate with this many rows,
+# average precision is simply a noisy statistic, and a Pareto front drawn from
+# single-split estimates is drawn on top of that noise. The front's shape is
+# partly real and partly resampling luck, and nothing in an Optuna plot tells you
+# which is which.
+#
+# Second, the latency saving is a percentage of a number that does not bind:
+# both ends of this front score ten thousand rows in **tens of milliseconds**.
+# A percentage is the wrong unit when both absolute values sit far inside the
+# budget — report the milliseconds, let the reader see the axis is slack, and
+# say so.
+#
+# Third, and this one is easy to miss: **this front is not reproducible.** The
+# accuracy axis is deterministic given the seed; the latency axis is a wall-clock
+# measurement, so it moves with machine load. Re-run this notebook and the
+# selected knee, the saving and the front's membership all shift — the numbers in
+# this discussion changed between two runs on the same container. Any objective
+# that includes a timing is a *noisy* objective, and a multi-objective study
+# built on one inherits that noise into its front. If latency genuinely matters,
+# time it as a median of repeats, on a quiet machine, and treat the front as an
+# estimate with error bars rather than as a set of points.
 #
 # **Report that rather than dressing it up.** A Pareto analysis whose front spans
 # a range nobody cares about has told you the two objectives were not in conflict

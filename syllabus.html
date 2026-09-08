@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Execution Gutter — scikit-learn, properly</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap">
+
+<style>
+:root{
+  --paper:#f1f3f6;
+  --panel:#fbfcfd;
+  --ink:#101a24;
+  --ink-2:#3a4a5c;
+  --ink-3:#6d7a89;
+  --rule:#d7dde5;
+  --rule-2:#e6eaef;
+  --blue:#3d5a80;
+  --blue-soft:#98c1d9;
+  --flame:#ee6c4d;
+  --moss:#5f8a6b;
+  --plum:#6d6875;
+  --gutter-idle:#c3ccd6;
+  --shadow:0 1px 2px rgba(16,26,36,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0d141c;
+    --panel:#141d27;
+    --ink:#e6ecf2;
+    --ink-2:#aebac7;
+    --ink-3:#7b8896;
+    --rule:#25313e;
+    --rule-2:#1c2530;
+    --blue:#8fb4d9;
+    --blue-soft:#3d5a80;
+    --flame:#ff8a6b;
+    --moss:#8dbf9b;
+    --plum:#a99fb0;
+    --gutter-idle:#2c3846;
+    --shadow:0 1px 2px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0d141c;
+  --panel:#141d27;
+  --ink:#e6ecf2;
+  --ink-2:#aebac7;
+  --ink-3:#7b8896;
+  --rule:#25313e;
+  --rule-2:#1c2530;
+  --blue:#8fb4d9;
+  --blue-soft:#3d5a80;
+  --flame:#ff8a6b;
+  --moss:#8dbf9b;
+  --plum:#a99fb0;
+  --gutter-idle:#2c3846;
+  --shadow:0 1px 2px rgba(0,0,0,.3);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"IBM Plex Serif",Georgia,serif;
+  font-size:16px; line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1060px;margin:0 auto;padding:0 28px 96px}
+
+/* ---------- masthead ---------- */
+header{padding:56px 0 30px;border-bottom:2px solid var(--ink)}
+.kicker{
+  font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--flame); margin:0 0 14px;
+}
+h1{
+  font-family:"IBM Plex Mono",monospace; font-weight:600;
+  font-size:clamp(30px,5.2vw,50px); line-height:1.06; letter-spacing:-.025em;
+  margin:0 0 16px; text-wrap:balance;
+}
+h1 .dim{color:var(--ink-3)}
+.standfirst{
+  font-size:17.5px; line-height:1.65; color:var(--ink-2);
+  max-width:62ch; margin:0;
+}
+.standfirst em{color:var(--ink);font-style:italic}
+
+/* ---------- progress strip ---------- */
+.progress{
+  display:flex; flex-wrap:wrap; align-items:baseline; gap:10px 26px;
+  padding:20px 0 26px; border-bottom:1px solid var(--rule);
+}
+.pcount{
+  font-family:"IBM Plex Mono",monospace; font-size:26px; font-weight:600;
+  font-variant-numeric:tabular-nums; letter-spacing:-.02em;
+}
+.plabel{font-family:"IBM Plex Sans",sans-serif;font-size:12.5px;color:var(--ink-3)}
+.bar{
+  flex:1 1 220px; min-width:180px; height:7px; background:var(--rule-2);
+  border-radius:0; overflow:hidden; position:relative;
+}
+.bar span{display:block;height:100%;background:var(--moss);width:0;transition:width .35s ease}
+.savehint{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3);
+  letter-spacing:.04em;
+}
+.savehint.busy{color:var(--flame)}
+
+/* ---------- setup ---------- */
+.setup{
+  margin:34px 0 8px; padding:22px 24px; background:var(--panel);
+  border:1px solid var(--rule); box-shadow:var(--shadow);
+}
+.setup h2{margin:0 0 12px}
+pre{
+  margin:0; padding:14px 16px; background:var(--paper);
+  border-left:3px solid var(--blue); overflow-x:auto;
+  font-family:"IBM Plex Mono",monospace; font-size:13px; line-height:1.75;
+  color:var(--ink-2);
+}
+pre .c{color:var(--ink-3)}
+
+h2{
+  font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:15px;
+  letter-spacing:.02em; margin:0 0 10px; color:var(--ink);
+}
+
+/* ---------- parts ---------- */
+.part{margin-top:52px}
+.part-head{
+  display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+  padding-bottom:10px; border-bottom:1px solid var(--ink);
+}
+.part-num{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--flame);
+}
+.part-title{
+  font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:20px;
+  letter-spacing:-.015em;margin:0;
+}
+.part-idea{
+  font-size:15px;color:var(--ink-2);margin:12px 0 4px;max-width:70ch;font-style:italic;
+}
+
+/* ---------- module rows ---------- */
+.row{
+  display:grid; grid-template-columns:78px 1fr; gap:0 18px;
+  border-bottom:1px solid var(--rule-2); padding:18px 0;
+}
+.row:last-child{border-bottom:none}
+
+.gutter{
+  font-family:"IBM Plex Mono",monospace; font-size:13.5px; font-weight:500;
+  color:var(--gutter-idle); padding-top:1px; user-select:none;
+}
+.gutter button{
+  all:unset; cursor:pointer; display:block; padding:1px 3px;
+  font:inherit; color:inherit; letter-spacing:-.02em;
+  border-radius:2px;
+}
+.gutter button:focus-visible{outline:2px solid var(--flame);outline-offset:2px}
+.gutter button:hover{color:var(--blue)}
+.row.done .gutter button{color:var(--moss)}
+.row.doing .gutter button{color:var(--flame)}
+
+.mod-title{
+  font-family:"IBM Plex Sans",sans-serif; font-weight:600; font-size:16.5px;
+  letter-spacing:-.005em; margin:0 0 5px; color:var(--ink);
+}
+.row.done .mod-title{color:var(--ink-3)}
+.row.done .mod-title span.strike{text-decoration:line-through;text-decoration-color:var(--rule)}
+.mod-idea{margin:0 0 9px;max-width:68ch;color:var(--ink-2);font-size:15.2px}
+.meta{
+  display:flex; flex-wrap:wrap; gap:6px 8px; align-items:center;
+  font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.03em;
+}
+.tag{
+  padding:2px 7px; border:1px solid var(--rule); color:var(--ink-3);
+  background:var(--panel); white-space:nowrap;
+}
+.tag.key{border-color:var(--flame);color:var(--flame)}
+.tag.file{color:var(--ink-2)}
+
+.finding{
+  margin:10px 0 0; padding:10px 0 0 14px; border-left:2px solid var(--blue-soft);
+  font-size:14.4px; line-height:1.58; color:var(--ink-2); max-width:70ch;
+}
+.finding b{color:var(--ink);font-weight:500}
+
+/* ---------- reference blocks ---------- */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:26px;margin-top:16px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+.scroll{overflow-x:auto}
+th{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);text-align:left;
+  padding:0 12px 7px 0;border-bottom:1px solid var(--ink);font-weight:500;
+}
+td{padding:9px 12px 9px 0;border-bottom:1px solid var(--rule-2);vertical-align:top;color:var(--ink-2)}
+td:first-child{color:var(--ink);font-family:"IBM Plex Mono",monospace;font-size:13px;white-space:nowrap}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+
+ul.sheets{list-style:none;margin:0;padding:0}
+ul.sheets li{
+  padding:8px 0;border-bottom:1px solid var(--rule-2);
+  display:flex;gap:12px;align-items:baseline;font-size:14.5px;color:var(--ink-2)
+}
+ul.sheets code{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink);
+  white-space:nowrap
+}
+
+.path{
+  margin-top:52px;padding:26px 28px;background:var(--panel);
+  border:1px solid var(--rule);border-top:3px solid var(--flame);box-shadow:var(--shadow);
+}
+.path ol{margin:14px 0 0;padding-left:20px}
+.path li{margin-bottom:9px;color:var(--ink-2);max-width:66ch}
+.path li b{color:var(--ink);font-weight:500}
+
+footer{
+  margin-top:56px;padding-top:20px;border-top:1px solid var(--rule);
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-3);
+  display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+}
+
+@media (max-width:620px){
+  .row{grid-template-columns:62px 1fr}
+  .wrap{padding:0 18px 72px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="kicker">Self-paced curriculum &nbsp;·&nbsp; scikit-learn 1.8 &nbsp;·&nbsp; Python 3.11+</p>
+  <h1>scikit-learn,<br><span class="dim">properly</span></h1>
+  <p class="standfirst">Seventeen runnable notebooks from the numeric stack to a signed-off credit model. Every exercise has a worked solution, and several of them reach the <em>opposite</em> conclusion to the one the exercise implies — because that is what the data said.</p>
+</header>
+
+<div class="progress">
+  <div><span class="pcount" id="pcount">0/17</span> <span class="plabel">modules complete</span></div>
+  <div class="bar"><span id="pbar"></span></div>
+  <div class="savehint" id="savehint">click a gutter mark to cycle&nbsp; [ ] → [*] → [✓]</div>
+</div>
+
+<section class="setup">
+  <h2>Setup</h2>
+  <pre>python -m venv .venv &amp;&amp; source .venv/bin/activate
+pip install -r requirements.txt
+jupyter lab notebooks/
+
+<span class="c">python make_data.py        # regenerate the five BFSI datasets</span>
+<span class="c">python build.py 08 12      # rebuild + execute just those modules</span></pre>
+</section>
+
+<div id="parts"></div>
+
+<section class="part">
+  <div class="part-head">
+    <span class="part-num">Reference</span>
+    <h2 class="part-title">Cheat sheets &amp; datasets</h2>
+  </div>
+  <div class="grid2">
+    <div>
+      <p class="part-idea">Meant to be open while you work, not read once.</p>
+      <ul class="sheets">
+        <li><code>01</code> The API — the estimator contract on one card</li>
+        <li><code>02</code> Choosing an estimator</li>
+        <li><code>03</code> Validation and leakage</li>
+        <li><code>04</code> Metrics and thresholds</li>
+        <li><code>05</code> The review checklist</li>
+        <li><code>06</code> Recipes</li>
+        <li><code>07</code> Performance and hardware</li>
+      </ul>
+    </div>
+    <div>
+      <p class="part-idea">Five generated BFSI datasets. Each was built to teach a specific failure mode rather than to be clean.</p>
+      <div class="scroll"><table>
+        <thead><tr><th>Dataset</th><th>Rows</th><th>The trap</th></tr></thead>
+        <tbody>
+          <tr><td>credit_risk</td><td class="num">12,000</td><td>MNAR missingness, a post-outcome leakage column, macro drift in year three</td></tr>
+          <tr><td>card_fraud</td><td class="num">60,000</td><td>0.7% positives; fraud clusters on compromised cards, so a random split inflates by ~34%</td></tr>
+          <tr><td>insurance_claims</td><td class="num">15,000</td><td>91% zeros; squared error predicts negative claim costs, Tweedie does not</td></tr>
+          <tr><td>telco_churn</td><td class="num">8,000</td><td>the classic blank <code>total_charges</code> on brand-new accounts</td></tr>
+          <tr><td>support_tickets</td><td class="num">6,000</td><td>5% label noise and 16% genuinely ambiguous text — a real accuracy ceiling</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<section class="path">
+  <h2>If you only do four</h2>
+  <ol>
+    <li><b>04 — Validation Strategy.</b> A wrong split moves your metric by twenty points and nothing warns you. Everything downstream is measured through it.</li>
+    <li><b>08 — Metrics, Calibration, Thresholds.</b> The one people skip most and benefit from most. The model emits a score; the business needs a decision.</li>
+    <li><b>12 — Interpretability and Fairness.</b> Where a model meets a committee, and where the binding constraint turns out to be legal rather than statistical.</li>
+    <li><b>14 — Capstone.</b> All of it at once, then exercise 14.4 attacks the recommendation the way a validator will.</li>
+  </ol>
+</section>
+
+<footer>
+  <span>~/scikit-learning</span>
+  <span>17 notebooks · 16 solution sets · 80 exercises · 7 cheat sheets</span>
+</footer>
+
+</div>
+
+<script>
+const MODULES = [
+  {part:0,id:"000",num:"—",file:"000_start_here",title:"Start here",
+   idea:"numpy, pandas, scipy, and where scikit-learn sits — including why any of it still matters in an LLM world.",
+   ex:0, sol:false,
+   finding:"Vectorised code is fast because the interpreter isn't in it. A million-element list costs ~4.5× the memory of the array holding the same numbers."},
+
+  {part:1,id:"00",num:"00",file:"00_the_estimator_contract",title:"The Estimator Contract",
+   idea:"scikit-learn is one interface implemented about two hundred times. Learn the interface.",
+   ex:5, sol:true,
+   finding:"scikit-learn enforces <code>feature_names_in_</code> at transform time: renaming a column is a <b>hard ValueError</b>, while the identical data passed as a bare numpy array gets only a UserWarning."},
+  {part:1,id:"01",num:"01",file:"01_data_representation",title:"Data Representation",
+   idea:"Most errors are shape, dtype and target-type errors, before any learning happens.",
+   ex:5, sol:true, key:true,
+   finding:"<code>employment_years</code> is missing for <b>62% of self-employed applicants and ~3% of everyone else</b>. That is the signature of MNAR — and the reason the missingness indicator carries real signal."},
+  {part:1,id:"02",num:"02",file:"02_transformers",title:"Transformers",
+   idea:"Scaling is geometry, not tidiness.",
+   ex:5, sol:true,
+   finding:"A pure-noise ID column, target-encoded naively, separates the target at <b>AUC 1.000</b>. Cross-fitted inside a pipeline, the same column scores 0.500."},
+  {part:1,id:"03",num:"03",file:"03_pipelines_and_composition",title:"Pipelines and Composition",
+   idea:"The pipeline is a correctness mechanism, not a convenience.",
+   ex:5, sol:true,
+   finding:"Selecting features before cross-validating scores <b>AUC 0.82 on 3,000 columns of pure noise</b>. Inside the pipeline the same procedure returns 0.47. Also: Pipeline does not clone its steps."},
+  {part:1,id:"04",num:"04",file:"04_validation_strategy",title:"Validation Strategy",
+   idea:"A wrong split moves your metric by twenty points, invisibly.",
+   ex:5, sol:true, key:true,
+   finding:"On the fraud data a random split inflates average precision by <b>~34%</b> over a card-grouped one, because fraud is a card-level event stored as transaction rows."},
+  {part:1,id:"05",num:"05",file:"05_linear_models",title:"Linear Models",
+   idea:"Build OLS and logistic regression from scratch; everything else stops being mysterious.",
+   ex:5, sol:true,
+   finding:"Four solvers agree to 1e-13 — until the design is collinear. At a condition number of 2e7 the normal equations and SVD least-squares differ by <b>8% on the same coefficient</b>, and <code>Ridge(alpha=1)</code> collapses both to 1.499."},
+
+  {part:2,id:"06",num:"06",file:"06_trees_and_ensembles",title:"Trees and Ensembles",
+   idea:"Bagging and boosting are opposite arguments about bias and variance.",
+   ex:5, sol:true,
+   finding:"The from-scratch tree matches sklearn's on <b>14 of 15 nodes</b>, with gains identical to the last bit. And a monotonic constraint <i>improved</i> the model."},
+  {part:2,id:"07",num:"07",file:"07_hyperparameter_search",title:"Hyperparameter Search",
+   idea:"Measure the size of the prize before spending the budget.",
+   ex:5, sol:true,
+   finding:"Pick the tolerance from a measured noise floor, not a round number: one standard deviation of average precision here is <b>0.023 on a spread of 0.10</b>. And a Pareto front with a timed axis is <b>not reproducible</b> — the knee moved between two runs on the same machine."},
+  {part:2,id:"08",num:"08",file:"08_metrics_calibration_thresholds",title:"Metrics, Calibration, Thresholds",
+   idea:"The model outputs a score; the business needs a decision. Those are different problems.",
+   ex:5, sol:true, key:true,
+   finding:"Calibration and ranking are independent. A model can rank perfectly and be unusable for pricing, and the cost-optimal threshold is <code>C_FP/(C_FP+C_FN)</code> — not 0.5."},
+  {part:2,id:"09",num:"09",file:"09_unsupervised",title:"Unsupervised Learning",
+   idea:"Clustering always returns clusters. Whether they mean anything is your job.",
+   ex:5, sol:true,
+   finding:"Gower + agglomerative won the silhouette by 2.5× with cluster sizes of <b>1492 / 2 / 2 / 4</b>. A high silhouette on a degenerate partition is not a good result — it is a meaningless number."},
+  {part:2,id:"10",num:"10",file:"10_text_and_embeddings",title:"Text, Features and Embeddings",
+   idea:"Where classical feature extraction ends and the LLM era begins.",
+   ex:5, sol:true, key:true,
+   finding:"Carrying the accuracy ceiling into the routing cost model <b>removes the LLM tier entirely</b>: escalation selects for tickets that are irreducibly ambiguous, where a larger model gains two points and a human who can <i>ask</i> reaches 98.5%."},
+
+  {part:3,id:"11",num:"11",file:"11_extending_sklearn",title:"Extending scikit-learn",
+   idea:"Custom estimators that pass check_estimator and compose properly.",
+   ex:5, sol:true,
+   finding:"An estimator that never resets state on refit <b>passes all 47 checks</b>. check_estimator verifies conformance, not correctness — so 11.5 ships the missing test in a real package."},
+  {part:3,id:"12",num:"12",file:"12_interpretability_and_fairness",title:"Interpretability and Fairness",
+   idea:"Explanations that survive a model-risk committee.",
+   ex:5, sol:true, key:true,
+   finding:"One model, one training run: the selection-rate ratio moves from <b>0.41 to 0.96 on threshold alone</b>. And the best age-parity model on the table is the one that uses age — which you may not use."},
+  {part:3,id:"13",num:"13",file:"13_production",title:"Production",
+   idea:"Persistence, drift, monitoring, and what breaks between notebook and service.",
+   ex:5, sol:true,
+   finding:"The corrupted-feed incident <b>saved money</b> under the stated cost matrix. A control framework watching only the P&amp;L would have reported it as an improvement."},
+  {part:3,id:"14",num:"14",file:"14_capstone",title:"Capstone",
+   idea:"End-to-end BFSI credit decisioning, from raw table to signed-off model.",
+   ex:5, sol:true, key:true,
+   finding:"14.4 attacks the recommendation as a validator would. The winner survives eight configurations — but the quoted margin is <b>a quarter of the across-design spread</b>, so the sentence does not."},
+  {part:3,id:"15",num:"15",file:"15_gpu_and_acceleration",title:"GPU and Acceleration",
+   idea:"What actually makes tabular ML fast — and why, on Apple Silicon, it isn't the GPU.",
+   ex:5, sol:true,
+   finding:"Tree building is <b>69% of the profile</b> and permanently off-limits to a GPU. And float32 carries <b>74×</b> the coefficient error of float64 at a condition number of only 2e4 — which makes Apple Silicon's float32-only GPU a modelling question, not a speed one."},
+];
+
+const PARTS = [
+  {n:0, num:"Before you start", title:"Foundations of the stack",
+   idea:"The gap one layer down — what a numpy array is, why a DataFrame behaves differently at an estimator boundary, and where scikit-learn sits in 2026."},
+  {n:1, num:"Part I", title:"Foundations",
+   idea:"Most errors happen before any learning does."},
+  {n:2, num:"Part II", title:"The model families",
+   idea:"Choose the family from the problem, then measure the prize before spending the budget."},
+  {n:3, num:"Part III", title:"Practice and performance",
+   idea:"The work that survives contact with an organisation."},
+];
+
+// state: 0 = not started, 1 = in progress, 2 = done. Jupyter's own gutter marks.
+const MARKS = ["[ ]", "[*]", "[✓]"];
+const CLS = ["", "doing", "done"];
+let state = {};
+
+function render(){
+  const host = document.getElementById("parts");
+  host.textContent = "";
+  for(const p of PARTS){
+    const sec = document.createElement("section");
+    sec.className = "part";
+    const head = document.createElement("div");
+    head.className = "part-head";
+    head.innerHTML = `<span class="part-num">${p.num}</span><h2 class="part-title">${p.title}</h2>`;
+    sec.appendChild(head);
+    const idea = document.createElement("p");
+    idea.className = "part-idea";
+    idea.textContent = p.idea;
+    sec.appendChild(idea);
+
+    for(const m of MODULES.filter(x => x.part === p.n)){
+      const s = state[m.id] || 0;
+      const row = document.createElement("div");
+      row.className = "row " + CLS[s];
+      row.dataset.id = m.id;
+
+      const g = document.createElement("div");
+      g.className = "gutter";
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.setAttribute("aria-label", `${m.title}: ${["not started","in progress","complete"][s]} — click to change`);
+      btn.textContent = `${m.num === "—" ? "  " : m.num} ${MARKS[s]}`;
+      btn.addEventListener("click", () => cycle(m.id));
+      g.appendChild(btn);
+
+      const body = document.createElement("div");
+      const tags = [`<span class="tag file">notebooks/${m.file}.ipynb</span>`];
+      if(m.ex) tags.push(`<span class="tag">${m.ex} exercises</span>`);
+      if(m.sol) tags.push(`<span class="tag">worked solutions</span>`);
+      if(m.key) tags.push(`<span class="tag key">high value</span>`);
+      body.innerHTML =
+        `<h3 class="mod-title"><span class="strike">${m.title}</span></h3>` +
+        `<p class="mod-idea">${m.idea}</p>` +
+        `<div class="meta">${tags.join("")}</div>` +
+        `<p class="finding">${m.finding}</p>`;
+
+      row.appendChild(g);
+      row.appendChild(body);
+      sec.appendChild(row);
+    }
+    host.appendChild(sec);
+  }
+  updateProgress();
+}
+
+function updateProgress(){
+  const done = MODULES.filter(m => (state[m.id] || 0) === 2).length;
+  document.getElementById("pcount").textContent = `${done}/${MODULES.length}`;
+  document.getElementById("pbar").style.width = `${(done / MODULES.length) * 100}%`;
+}
+
+let saver = null;
+function cycle(id){
+  state[id] = ((state[id] || 0) + 1) % 3;
+  const row = document.querySelector(`.row[data-id="${id}"]`);
+  const s = state[id];
+  row.className = "row " + CLS[s];
+  const m = MODULES.find(x => x.id === id);
+  const btn = row.querySelector("button");
+  btn.textContent = `${m.num === "\u2014" ? "  " : m.num} ${MARKS[s]}`;
+  btn.setAttribute("aria-label", `${m.title}: ${["not started","in progress","complete"][s]} \u2014 click to change`);
+  updateProgress();
+  save();
+}
+
+const hint = document.getElementById("savehint");
+function save(){
+  clearTimeout(saver);
+  try{
+    localStorage.setItem("sk-syllabus", JSON.stringify(state));
+    hint.textContent = "progress saved in this browser";
+  }catch(e){
+    hint.textContent = "browser storage unavailable \u2014 progress not kept";
+  }
+  saver = setTimeout(() => {
+    hint.textContent = "click a gutter mark to cycle\u00a0 [ ] \u2192 [*] \u2192 [\u2713]";
+  }, 2600);
+}
+
+try{
+  const raw = localStorage.getItem("sk-syllabus");
+  if(raw) state = JSON.parse(raw) || {};
+}catch(e){}
+
+render();
+</script>
+</body>
+</html>

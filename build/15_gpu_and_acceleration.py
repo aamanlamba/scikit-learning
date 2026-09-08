@@ -415,7 +415,7 @@ pd.DataFrame(tree_rows).set_index("estimator")
 #
 # On an Apple Silicon Mac with 10–16 cores, the realistic acceleration question
 # is not "GPU or CPU" — it is "am I using my cores, or fighting myself for
-# them?" Module 06's solution notebook found a **40× slowdown** from nested
+# them?" Exercise 15.4 measures this penalty on your own machine — expect a slowdown from nested
 # thread pools. That is a much bigger number than any GPU speed-up in this
 # module.
 
@@ -505,7 +505,7 @@ jobs
 # The honest allocation of effort for the work in this curriculum:
 #
 # ```
-# 1. Fix the threading.                      minutes,  up to 40x   (section 7)
+# 1. Fix the threading.                      minutes,  measure it  (section 7, ex 15.4)
 # 2. Use HistGradientBoosting, not GBM.      minutes,  10-100x     (Module 06)
 # 3. Cache preprocessing in searches.        minutes,  2-5x        (Module 03)
 # 4. Reduce the search budget.               free,     often 4x    (Module 07)

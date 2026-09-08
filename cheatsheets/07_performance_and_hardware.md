@@ -6,7 +6,7 @@ Work down this list. Stop when it's fast enough.
 
 | # | Change | Effort | Typical gain |
 |---|---|---|---|
-| 1 | Fix nested thread pools (`n_jobs=1` on inner estimators) | minutes | **up to 40×** |
+| 1 | Fix nested thread pools (`n_jobs=1` on inner estimators) | minutes | **measure it — grows with core count** |
 | 2 | `HistGradientBoosting` instead of `GradientBoosting`/`RandomForest` | minutes | 10–100× |
 | 3 | Subsample during development | free | 10× |
 | 4 | `Pipeline(memory=...)` to cache preprocessing in a search | minutes | 2–5× |
@@ -16,7 +16,9 @@ Work down this list. Stop when it's fast enough.
 | 8 | `newton-cholesky` solver when n ≫ p | seconds | up to 10× |
 | 9 | Move dense linear algebra to the GPU | a day | 1–3×, on 13 estimators |
 
-**Number 1 is the one people miss and the largest single win.**
+**Number 1 is the one people miss and usually the largest single win.** Do not
+quote a multiple you have not measured: the penalty depends on your core count
+*and* on how deep the nesting goes. Exercise 15.4 measures it in place.
 
 ## Threading
 

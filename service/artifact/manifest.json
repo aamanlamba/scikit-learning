@@ -1,0 +1,202 @@
+{
+  "name": "consumer_default_risk",
+  "version": "1.0.0",
+  "created_utc": "2026-09-07T21:45:44+00:00",
+  "model_sha256": "fcd9e041f4f93c1b7a42083a1c59ecd0c939da7d7f68caa320917a3267036099",
+  "environment": {
+    "python": "3.11.15",
+    "scikit_learn": "1.8.0",
+    "numpy": "2.4.4",
+    "pandas": "3.0.2"
+  },
+  "training": {
+    "n_rows": 6650,
+    "base_rate": 0.11473684210526315,
+    "feature_order": [
+      "age",
+      "employment_years",
+      "loan_amount",
+      "term_months",
+      "interest_rate",
+      "debt_to_income",
+      "credit_score",
+      "n_open_accounts",
+      "n_delinq_2yr",
+      "home_ownership",
+      "purpose",
+      "employment_type",
+      "region",
+      "channel",
+      "prior_customer"
+    ]
+  },
+  "decision": {
+    "threshold": 0.23076923076923078,
+    "threshold_basis": "C_FP/(C_FP+C_FN) with C_FP=1800.0, C_FN=6000.0",
+    "cost_fp": 1800.0,
+    "cost_fn": 6000.0
+  },
+  "holdout": {
+    "n": 5350,
+    "average_precision": 0.4611339459712533,
+    "roc_auc": 0.7748073294916745,
+    "brier": 0.10896259548257223,
+    "calibration_gap": -0.03641727470966205
+  },
+  "fairness": {
+    "attribute": "age_band",
+    "criterion": "selection_rate_ratio",
+    "regulatory_screen": 0.8,
+    "measured_at_release_holdout": 0.6499,
+    "n_holdout": 5350,
+    "clears_screen": false,
+    "fairness_sample_ratio": 0.5298,
+    "n_fairness_sample": 1502,
+    "regression_tolerance": 0.1,
+    "note": "Below the four-fifths screen. Documented as a residual disparity requiring written justification (see model documentation, s.8). The release test is a REGRESSION tripwire on the 200-row reference sample shipped with the bundle, not a measurement: the governance number is the holdout figure, and the production check must run on live scored volume."
+  },
+  "schema": {
+    "age": {
+      "dtype": "int64",
+      "nullable": false,
+      "min": 19.0,
+      "max": 85.0,
+      "p01": 19.0,
+      "p99": 75.0,
+      "std": 11.979370244038165
+    },
+    "employment_years": {
+      "dtype": "float64",
+      "nullable": true,
+      "min": 0.1,
+      "max": 45.0,
+      "p01": 0.4,
+      "p99": 22.14899999999998,
+      "std": 4.74204116010265
+    },
+    "loan_amount": {
+      "dtype": "float64",
+      "nullable": false,
+      "min": 1000.0,
+      "max": 120000.0,
+      "p01": 1000.0,
+      "p99": 68902.00000000004,
+      "std": 14220.655502715557
+    },
+    "term_months": {
+      "dtype": "int64",
+      "nullable": false,
+      "min": 12.0,
+      "max": 60.0,
+      "p01": 12.0,
+      "p99": 60.0,
+      "std": 14.053072752724919
+    },
+    "interest_rate": {
+      "dtype": "float64",
+      "nullable": false,
+      "min": 10.18,
+      "max": 22.26,
+      "p01": 11.9998,
+      "p99": 19.080200000000005,
+      "std": 1.4404351737474828
+    },
+    "debt_to_income": {
+      "dtype": "float64",
+      "nullable": false,
+      "min": 0.0284,
+      "max": 1.4,
+      "p01": 0.082843,
+      "p99": 1.1400300000000008,
+      "std": 0.20564789639980036
+    },
+    "credit_score": {
+      "dtype": "float64",
+      "nullable": true,
+      "min": 430.0,
+      "max": 824.0,
+      "p01": 508.19,
+      "p99": 766.0,
+      "std": 54.05257464574131
+    },
+    "n_open_accounts": {
+      "dtype": "int64",
+      "nullable": false,
+      "min": 0.0,
+      "max": 17.0,
+      "p01": 0.4899999999999949,
+      "p99": 11.0,
+      "std": 2.3406451322801027
+    },
+    "n_delinq_2yr": {
+      "dtype": "int64",
+      "nullable": false,
+      "min": 0.0,
+      "max": 3.0,
+      "p01": 0.0,
+      "p99": 1.0,
+      "std": 0.3057665662753416
+    },
+    "home_ownership": {
+      "dtype": "str",
+      "nullable": false,
+      "categories": [
+        "mortgage",
+        "own",
+        "rent"
+      ]
+    },
+    "purpose": {
+      "dtype": "str",
+      "nullable": false,
+      "categories": [
+        "auto",
+        "debt_consolidation",
+        "home_improvement",
+        "major_purchase",
+        "medical",
+        "other",
+        "small_business"
+      ]
+    },
+    "employment_type": {
+      "dtype": "str",
+      "nullable": false,
+      "categories": [
+        "contract",
+        "retired",
+        "salaried",
+        "self_employed",
+        "unemployed"
+      ]
+    },
+    "region": {
+      "dtype": "str",
+      "nullable": false,
+      "categories": [
+        "midwest",
+        "northeast",
+        "south",
+        "west"
+      ]
+    },
+    "channel": {
+      "dtype": "str",
+      "nullable": false,
+      "categories": [
+        "branch",
+        "broker",
+        "digital",
+        "partner"
+      ]
+    },
+    "prior_customer": {
+      "dtype": "bool",
+      "nullable": false,
+      "categories": [
+        "False",
+        "True"
+      ]
+    }
+  }
+}

@@ -303,8 +303,8 @@ pd.DataFrame(wide_rows).set_index(["n_rows", "n_noise_features"])
 # Rank them by *how much the gap can grow* and *how likely you are to miss it*:
 #
 # 1. **Feature selection (2)** is the most dangerous. Its inflation scales with
-#    the number of candidates — Module 03 showed 0.5 → 0.75 AUC on **pure noise**
-#    with 3,000 features. On a wide dataset it is catastrophic, and the workflow
+#    the number of candidates — Module 03 showed 0.5 → 0.82 AUC on **pure noise**
+#    with 3,000 features and 300 rows. On a wide dataset it is catastrophic, and the workflow
 #    ("screen first, then model the shortlist") is extremely common.
 # 2. **Target encoding (3)** is next: inflation scales with cardinality, and the
 #    difference between the safe and unsafe call is `fit_transform` versus

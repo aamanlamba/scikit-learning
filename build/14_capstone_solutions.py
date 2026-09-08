@@ -155,6 +155,35 @@ designs["inflation_vs_grouped"] = (designs["avg_precision"]
 designs.round(4)
 
 # %% [markdown]
+# ### Reconciling this with Module 04, which measured a much bigger number
+#
+# Module 04 runs the same comparison on the same dataset and reports the random
+# split inflating average precision by **+34%**. The table above shows a far
+# smaller gap. Both are correct, and the difference is one line of setup.
+#
+# **Module 04 deliberately leaves `card_id` in the feature matrix** — it says so
+# — because its subject is what a validation scheme has to catch. With the card
+# identifier available, a random split lets the model memorise *which specific
+# cards are compromised*, and the inflation is large. **This exercise drops
+# `card_id`**, because its subject is a model you would actually deploy, and a
+# raw entity id is not a feature you ship.
+#
+# So the two numbers measure two different failures:
+#
+# | | Module 04 | Here |
+# |---|---|---|
+# | `card_id` in the features | yes, on purpose | no |
+# | What the random split leaks | the identity of compromised cards | only the shared structure among a card's transactions |
+# | Measured inflation | large | modest |
+#
+# **The lesson is that leakage magnitude is a property of the feature set as
+# much as of the split.** Quoting "grouped splits cost you N%" without saying
+# which features were in the matrix is meaningless — and the pair of numbers
+# above is a cheap demonstration of why. If you find two of your own experiments
+# disagreeing on the cost of a validation scheme, the feature matrix is the first
+# place to look.
+
+# %% [markdown]
 # ### Step 4 — entity-level features, and why they are the whole game
 
 # %%
