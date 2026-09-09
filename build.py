@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parent
 SRC = ROOT / "build"
 OUT_NB = ROOT / "notebooks"
 OUT_SOL = ROOT / "solutions"
+OUT_GUIDE = ROOT / "guided"
 
 
 def targets(prefixes: list[str]) -> list[Path]:
@@ -42,7 +43,12 @@ def convert(path: Path) -> Path:
         "name": "python3",
     }
     nb.metadata["language_info"] = {"name": "python", "version": sys.version.split()[0]}
-    dest_dir = OUT_SOL if "_solutions" in path.stem else OUT_NB
+    if "_solutions" in path.stem:
+        dest_dir = OUT_SOL
+    elif "_guided" in path.stem:
+        dest_dir = OUT_GUIDE
+    else:
+        dest_dir = OUT_NB
     dest_dir.mkdir(parents=True, exist_ok=True)
     dest = dest_dir / (path.stem + ".ipynb")
     nbformat.write(nb, dest)

@@ -162,10 +162,35 @@ print(f"B (clean) : {clean.mean():.4f} ± {clean.std():.4f}")
 print(f"mean difference: {leaky.mean() - clean.mean():+.5f}   (paired std {np.std(leaky - clean):.5f})")
 
 # %% [markdown]
-# **Why the gap is small here.** `StandardScaler` learns only two numbers per
-# feature, and with 569 rows the test set's contribution to a mean and a standard
-# deviation is a small perturbation of the training-set values. The leak is real
-# but its magnitude is bounded by how much the statistic moves.
+# **Why the gap is small here — and the usual explanation is only half of it.**
+#
+# The answer normally given is that `StandardScaler` learns only two numbers per
+# feature, so with 569 rows the test set's contribution to a mean and a standard
+# deviation is a small perturbation. True, and **not the dominant reason.** The
+# guided notebook measures the other half directly: corrupt the scaler's learned
+# constants far more violently than any leak could — a log-normal perturbation
+# with sigma = 1 — and test accuracy moves by about a point. At realistic
+# perturbations it does not move at all.
+#
+# The reason is that **a logistic regression is very nearly invariant to an
+# affine rescaling of its inputs.** Rescaling feature *j* is undone by the model
+# rescaling coefficient *j*; shifting it is absorbed by the intercept. All that
+# survives is the interaction with the regularisation penalty.
+#
+# So a leak needs **two** things to be true, and this pairing fails both:
+#
+# 1. the leaked rows must appreciably **change the fitted transform**, and
+# 2. the model's answer must **depend** on that part of the transform.
+#
+# | | changes the transform? | model depends on it? | visible? |
+# |---|---|---|---|
+# | `StandardScaler` → logistic regression | barely | almost not at all | no |
+# | `SelectKBest` → anything | enormously — it picks *which columns exist*, using the labels | totally | **+0.24 on pure noise** |
+#
+# **The rule to carry forward:** the size of a leak is *(how much the leaked
+# information changes the fitted transform)* × *(how much the model's answer
+# depends on that transform)*. A near-zero reading means one factor was near
+# zero **for this pairing**, and says nothing about the next one.
 #
 # **Where it would move a lot:** any transformer that learns something
 # high-dimensional or target-aware — `SelectKBest`, `TargetEncoder`,
@@ -173,9 +198,20 @@ print(f"mean difference: {leaky.mean() - clean.mean():+.5f}   (paired std {np.st
 # anything fitted on 3,000 features and 300 rows (Module 03 measures that one:
 # 0.5 → 0.82 AUC on pure noise).
 #
-# The lesson is not "scaling before splitting is fine". It is that **the size of
-# a leak depends on how much the transformer can learn**, so a small measured gap
-# on one transformer says nothing about the next one.
+# The lesson is not "scaling before splitting is fine", and it is not even "the
+# size of a leak depends on how much the transformer can learn" — that is factor
+# 1 alone. It is that **you cannot audit for leakage by measuring it.** A
+# measurement gives you one number for one transformer paired with one model on
+# one dataset. What protects you is the *structural* guarantee that `fit` only
+# ever sees training rows, which is what a `Pipeline` is — and why Module 03
+# calls it a correctness mechanism rather than a convenience.
+#
+# > **The habit worth taking from this exercise: when a measurement reads zero,
+# > point the same instrument at a case where the effect is known to be large.**
+# > `guided/00_the_estimator_contract_guided.ipynb` runs that positive control —
+# > the identical harness, with `SelectKBest` on pure noise, reads +0.24. Once
+# > the instrument is shown to work, a zero reading becomes a finding instead of
+# > a suspicion.
 
 # %% [markdown]
 # ## 0.5 — Navigate without Google

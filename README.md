@@ -12,6 +12,7 @@ Built for scikit-learn **1.8**, Python 3.11+.
 ```
 scikit-learning/
 ├── notebooks/       the modules — run these, in order
+├── guided/          stuck? hints that unfold, plus self-checks, before the answer
 ├── solutions/       worked answers to every exercise
 ├── cheatsheets/     reference cards to keep open while you work
 ├── data/            generated BFSI datasets (regenerate with make_data.py)
@@ -26,6 +27,12 @@ scikit-learning/
 Each module is a runnable notebook containing worked material, then a set of
 exercises at the end with empty cells. The matching file in `solutions/` has
 worked answers. Resist it until you have something that runs.
+
+**If you get stuck**, `guided/` sits between the two: for each exercise it gives
+you what the exercise is really testing, a question to answer before writing any
+code, three hints behind click-to-open blocks, and a **self-check function** you
+run against your own attempt. The answer is last, also collapsed. Module 00 has
+one; ask for others as you need them.
 
 > **Status.** Complete. The orientation chapter, all 16 module notebooks, all 16
 > worked solution sets and all 7 cheat sheets execute end to end against
